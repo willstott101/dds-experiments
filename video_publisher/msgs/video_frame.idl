@@ -1,0 +1,6 @@
+struct VideoFrame
+{
+    unsigned long long timestamp_us;
+    string format;
+    sequence<char> data;
+};
