@@ -26,6 +26,7 @@ endif()
 find_package(fastrtps REQUIRED)
 
 add_subdirectory(video_publisher)
+add_subdirectory(generic_subscriber)
 
 # add_library(eapulse SHARED
 #   src/pulseaudio.cpp
