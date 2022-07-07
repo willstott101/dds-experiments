@@ -17,6 +17,7 @@ public:
 
     static VideoFramePublisher createPublisher();
 
+private:
     class PubListener : public fastdds::dds::DataWriterListener
     {
     public:
@@ -37,7 +38,6 @@ public:
         int matched;
     };
 
-private:
     VideoFramePublisher(
         fastdds::dds::TypeSupport type,
         fastdds::dds::DomainParticipant* participant,

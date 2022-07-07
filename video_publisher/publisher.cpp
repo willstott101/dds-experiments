@@ -26,7 +26,6 @@ VideoFramePublisher::VideoFramePublisher(
         topic(topic_),
         writer(writer_),
         listener(listener_) {
-    // frame.timestamp_us(0);
     frame.format("RGB888");
 }
 
@@ -74,6 +73,7 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
 
     if (publisher == nullptr)
     {
+        factory->delete_participant(participant);
         throw std::runtime_error("Could not create publisher");
     }
 
@@ -92,6 +92,8 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
 
     if (topic == nullptr)
     {
+        participant->delete_publisher(publisher);
+        factory->delete_participant(participant);
         throw std::runtime_error("Could not create topic");
     }
 
@@ -112,6 +114,9 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
 
     if (writer == nullptr)
     {
+        participant->delete_topic(topic);
+        participant->delete_publisher(publisher);
+        factory->delete_participant(participant);
         throw std::runtime_error("Could not create DataWriter");
     }
 
