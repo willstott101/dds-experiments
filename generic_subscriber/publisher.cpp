@@ -75,7 +75,7 @@ bool HelloWorldPublisher::init()
         return false;
     }
 
-    topic_ = mp_participant->create_topic("DDSDynHelloWorldTopic", "HelloWorld", TOPIC_QOS_DEFAULT);
+    topic_ = mp_participant->create_topic("DDSDynHelloWorldTopic", m_type.get_type_name(), TOPIC_QOS_DEFAULT);
 
     if (topic_ == nullptr)
     {
