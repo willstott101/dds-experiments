@@ -1,5 +1,5 @@
 // #include "msgs/video_framePubSubTypes.h"
-#define DYNAMIC_TYPES_CHECKING
+// #define DYNAMIC_TYPES_CHECKING
 
 #include <fastdds/dds/publisher/DataWriterListener.hpp>
 #include <fastdds/dds/topic/TypeSupport.hpp>

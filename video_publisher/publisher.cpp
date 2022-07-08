@@ -70,17 +70,16 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
     fastrtps::types::DynamicTypeBuilder_ptr builder = typefac->create_sequence_builder(char_type);
     fastrtps::types::DynamicType_ptr sequence_type = builder->build();
 
+    fastrtps::types::DynamicTypeBuilder_ptr builder2 = typefac->create_sequence_builder(sequence_type);
+    fastrtps::types::DynamicType_ptr sequence2_type = builder2->build();
+
     fastrtps::types::DynamicTypeBuilder_ptr struct_type_builder(typefac->create_struct_builder());
     struct_type_builder->add_member(0, "format", typefac->create_string_type());
-    struct_type_builder->add_member(1, "data", sequence_type);
+    struct_type_builder->add_member(1, "data", sequence2_type);
     struct_type_builder->set_name("VideoFrame");
     fastrtps::types::DynamicType_ptr dynTypePtr = struct_type_builder->build();
     dynType.SetDynamicType(dynTypePtr);
     fastrtps::types::DynamicData_ptr dynMsg(fastrtps::types::DynamicDataFactory::get_instance()->create_data(dynTypePtr));
-
-    // auto dynSeq = fastrtps::types::DynamicDataFactory::get_instance()->create_data(sequence_type);
-    // std::cout << "mid: " << dynMsg->get_member_id_by_name("data") << std::endl;
-    // dynMsg->set_complex_value(dynSeq, dynMsg->get_member_id_by_name("data"));
 
     fastdds::dds::TypeSupport type(dynType);
     // REGISTER THE TYPE
@@ -202,10 +201,17 @@ bool VideoFramePublisher::publish() {
         fastrtps::types::DynamicData* seq = frame->loan_value(1);
         if (seq->get_item_count() == 0) {
             fastrtps::types::MemberId mId;
-            seq->insert_char8_value('1', mId);
-            seq->insert_char8_value('2', mId);
-            seq->insert_char8_value('3', mId);
-            seq->insert_char8_value('4', mId);
+            seq->insert_sequence_data(mId);
+            std::cout << "insert_sequence_data: " << mId << std::endl;
+            seq->insert_sequence_data(mId);
+            std::cout << "insert_sequence_data: " << mId << std::endl;
+            fastrtps::types::DynamicData* seq2 = seq->loan_value(mId);
+            std::cout << "loan_value: " << seq2 << std::endl;
+            seq2->insert_char8_value('1', mId);
+            seq2->insert_char8_value('2', mId);
+            seq2->insert_char8_value('3', mId);
+            seq2->insert_char8_value('4', mId);
+            seq->return_loaned_value(seq2);
         } else {
             // seq->set_char8_value('1', seq->get_member_id_at_index(0));
         }
