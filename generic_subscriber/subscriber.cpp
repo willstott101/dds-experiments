@@ -104,21 +104,25 @@ void HelloWorldSubscriber::SubListener::on_subscription_matched(
 void HelloWorldSubscriber::SubListener::on_data_available(
         DataReader* reader)
 {
+    // std::cout << "on_data_available" << std::endl;
     auto dit = subscriber_->datas_.find(reader);
 
     if (dit != subscriber_->datas_.end())
     {
         eprosima::fastrtps::types::DynamicData_ptr data = dit->second;
         SampleInfo info;
-        if (reader->take_next_sample(data.get(), &info) == ReturnCode_t::RETCODE_OK)
+        auto ret = reader->take_next_sample(data.get(), &info);
+        if (ret == ReturnCode_t::RETCODE_OK)
         {
             if (info.instance_state == ALIVE_INSTANCE_STATE)
             {
                 eprosima::fastrtps::types::DynamicType_ptr type = subscriber_->readers_[reader];
                 this->n_samples++;
-                std::cout << "Received data of type " << type->get_name() << std::endl;
+                std::cout << "Received data of type " << type->get_name() << " with source_timestamp " << info.source_timestamp << std::endl;
                 eprosima::fastrtps::types::DynamicDataHelper::print(data);
             }
+        } else {
+            std::cout << "failed to take sample: " << ret() << std::endl;
         }
     }
 }
@@ -148,6 +152,7 @@ void HelloWorldSubscriber::SubListener::on_type_discovery(
 
         if (subscriber_->mp_subscriber == nullptr)
         {
+            std::cout << "couldn't create subscriber" << std::endl;
             return;
         }
     }
@@ -160,6 +165,7 @@ void HelloWorldSubscriber::SubListener::on_type_discovery(
 
     if (topic == nullptr)
     {
+        std::cout << "couldn't create topic" << std::endl;
         return;
     }
 

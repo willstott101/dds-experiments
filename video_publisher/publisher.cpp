@@ -7,6 +7,10 @@
 #include <fastdds/dds/publisher/qos/PublisherQos.hpp>
 #include <fastdds/dds/publisher/DataWriter.hpp>
 #include <fastdds/dds/publisher/qos/DataWriterQos.hpp>
+#include <fastrtps/types/DynamicDataHelper.hpp>
+#include <fastrtps/types/DynamicDataFactory.h>
+#include <fastrtps/types/DynamicTypeBuilderPtr.h>
+#include <fastrtps/types/DynamicTypeBuilderFactory.h>
 
 #include <thread>
 #include <chrono>
@@ -15,18 +19,21 @@ using namespace eprosima;
 
 VideoFramePublisher::VideoFramePublisher(
         fastdds::dds::TypeSupport type_,
+        fastrtps::types::DynamicData_ptr frame_,
         fastdds::dds::DomainParticipant* participant_,
         fastdds::dds::Publisher* publisher_,
         fastdds::dds::Topic* topic_,
         fastdds::dds::DataWriter* writer_,
         PubListener listener_
 ) : type(type_),
+    frame(frame_),
         participant(participant_),
         publisher(publisher_),
         topic(topic_),
         writer(writer_),
         listener(listener_) {
-    frame.format("RGB888");
+    // frame.format("RGB888");
+    frame->set_string_value("RGB888", 0);
 }
 
 VideoFramePublisher::~VideoFramePublisher() {
@@ -55,8 +62,31 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
         throw std::runtime_error("Could not create DomainParticipant");
     }
 
+    // fastrtps::types::DynamicData* m_DynHello;
+    fastrtps::types::DynamicPubSubType dynType;
+
+    auto typefac = fastrtps::types::DynamicTypeBuilderFactory::get_instance();
+    fastrtps::types::DynamicType_ptr char_type = typefac->create_char8_type();
+    fastrtps::types::DynamicTypeBuilder_ptr builder = typefac->create_sequence_builder(char_type);
+    fastrtps::types::DynamicType_ptr sequence_type = builder->build();
+
+    fastrtps::types::DynamicTypeBuilder_ptr struct_type_builder(typefac->create_struct_builder());
+    struct_type_builder->add_member(0, "format", typefac->create_string_type());
+    struct_type_builder->add_member(1, "data", sequence_type);
+    struct_type_builder->set_name("VideoFrame");
+    fastrtps::types::DynamicType_ptr dynTypePtr = struct_type_builder->build();
+    dynType.SetDynamicType(dynTypePtr);
+    fastrtps::types::DynamicData_ptr dynMsg(fastrtps::types::DynamicDataFactory::get_instance()->create_data(dynTypePtr));
+
+    // auto dynSeq = fastrtps::types::DynamicDataFactory::get_instance()->create_data(sequence_type);
+    // std::cout << "mid: " << dynMsg->get_member_id_by_name("data") << std::endl;
+    // dynMsg->set_complex_value(dynSeq, dynMsg->get_member_id_by_name("data"));
+
+    fastdds::dds::TypeSupport type(dynType);
     // REGISTER THE TYPE
-    fastdds::dds::TypeSupport type(new VideoFramePubSubType());
+    // fastdds::dds::TypeSupport type(new VideoFramePubSubType());
+    type.get()->auto_fill_type_information(false);
+    type.get()->auto_fill_type_object(true);
     type.register_type(participant);
 
     // CREATE THE PUBLISHER
@@ -120,12 +150,12 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
         throw std::runtime_error("Could not create DataWriter");
     }
 
-    return VideoFramePublisher(type, participant, publisher, topic, writer, listener);
+    return VideoFramePublisher(type, dynMsg, participant, publisher, topic, writer, listener);
 }
 
 void VideoFramePublisher::PubListener::on_publication_matched(
-    eprosima::fastdds::dds::DataWriter*,
-    const eprosima::fastdds::dds::PublicationMatchedStatus& info)
+    fastdds::dds::DataWriter*,
+    const fastdds::dds::PublicationMatchedStatus& info)
 {
     if (info.current_count_change == 1)
     {
@@ -167,15 +197,23 @@ void VideoFramePublisher::runForever(uint32_t sleep_us)
 }
 
 bool VideoFramePublisher::publish() {
-    if (listener.matched > 0)
+    if (listener.matched > -1)
     {
-        auto now = std::chrono::steady_clock::now();
-        auto now_us = std::chrono::time_point_cast<std::chrono::microseconds>(now);
-        auto epoch = now_us.time_since_epoch();
-        auto value = std::chrono::duration_cast<std::chrono::microseconds>(epoch);
-        frame.timestamp_us(value.count());
-        frame.data({'1', '2', '3', '4'});
-        writer->write(&frame);
+        fastrtps::types::DynamicData* seq = frame->loan_value(1);
+        if (seq->get_item_count() == 0) {
+            fastrtps::types::MemberId mId;
+            seq->insert_char8_value('1', mId);
+            seq->insert_char8_value('2', mId);
+            seq->insert_char8_value('3', mId);
+            seq->insert_char8_value('4', mId);
+        } else {
+            // seq->set_char8_value('1', seq->get_member_id_at_index(0));
+        }
+        frame->return_loaned_value(seq);
+        // frame.data({'1', '2', '3', '4'});
+        writer->write(frame.get());
+        std::cout << "Message written" << std::endl;
+        fastrtps::types::DynamicDataHelper::print(frame);
         return true;
     }
     return false;

@@ -1,4 +1,5 @@
-#include "msgs/video_framePubSubTypes.h"
+// #include "msgs/video_framePubSubTypes.h"
+#define DYNAMIC_TYPES_CHECKING
 
 #include <fastdds/dds/publisher/DataWriterListener.hpp>
 #include <fastdds/dds/topic/TypeSupport.hpp>
@@ -40,6 +41,7 @@ private:
 
     VideoFramePublisher(
         fastdds::dds::TypeSupport type,
+        fastrtps::types::DynamicData_ptr frame,
         fastdds::dds::DomainParticipant* participant,
         fastdds::dds::Publisher* publisher,
         fastdds::dds::Topic* topic,
@@ -47,7 +49,8 @@ private:
         PubListener listener
     );
 
-    VideoFrame frame;
+    // VideoFrame frame;
+    fastrtps::types::DynamicData_ptr frame;
 
     fastdds::dds::DomainParticipant* participant;
     fastdds::dds::Publisher* publisher;

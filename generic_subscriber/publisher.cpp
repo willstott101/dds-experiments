@@ -118,7 +118,6 @@ void HelloWorldPublisher::PubListener::on_publication_matched(
     if (info.current_count_change == 1)
     {
         n_matched = info.total_count;
-        firstConnected = true;
         std::cout << "Publisher matched" << std::endl;
     }
     else if (info.current_count_change == -1)
@@ -225,7 +224,7 @@ void HelloWorldPublisher::run(
 bool HelloWorldPublisher::publish(
         bool waitForListener)
 {
-    if (m_listener.firstConnected || !waitForListener || m_listener.n_matched > 0)
+    if (m_listener.n_matched > 0)
     {
         uint32_t index;
         m_Hello->get_uint32_value(index, 1);

@@ -41,7 +41,6 @@ private:
 
         PubListener()
             : n_matched(0)
-            , firstConnected(false)
         {
         }
 
@@ -53,9 +52,6 @@ private:
                 eprosima::fastdds::dds::DataWriter* writer,
                 const eprosima::fastdds::dds::PublicationMatchedStatus& info) override;
         int n_matched;
-
-        bool firstConnected;
-
     }
     m_listener;
 
