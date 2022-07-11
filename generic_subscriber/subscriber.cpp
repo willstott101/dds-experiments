@@ -118,7 +118,7 @@ void HelloWorldSubscriber::SubListener::on_data_available(
             {
                 eprosima::fastrtps::types::DynamicType_ptr type = subscriber_->readers_[reader];
                 this->n_samples++;
-                std::cout << "Received data of type " << type->get_name() << " with source_timestamp " << info.source_timestamp << std::endl;
+                std::cout << "Received data of type " << type->get_name() << " with source_timestamp " << info.source_timestamp << " and identity " << info.sample_identity << std::endl;
                 eprosima::fastrtps::types::DynamicDataHelper::print(data);
             }
         } else {
