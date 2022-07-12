@@ -1,0 +1,15 @@
+struct VideoFrame
+{
+    string format;
+    sequence<char> data;
+};
+
+struct VideoFrameFixed
+{
+    // string format;
+    octet fmt[64];
+    unsigned long width;
+    unsigned long height;
+    // 1920 * 1080 * 3
+    octet data[6220800];
+};

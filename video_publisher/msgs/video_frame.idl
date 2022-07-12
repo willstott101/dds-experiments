@@ -1,5 +1,0 @@
-struct VideoFrame
-{
-    string format;
-    sequence<char> data;
-};
