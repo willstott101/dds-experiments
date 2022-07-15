@@ -14,7 +14,7 @@ public:
 
     fastdds::dds::TypeSupport type;
 
-    static VideoFramePublisher createPublisher();
+    static VideoFramePublisher createPublisher(uint32_t buffer_len);
 
 private:
     class PubListener : public fastdds::dds::DataWriterListener
@@ -46,8 +46,6 @@ private:
         PubListener listener
     );
 
-    VideoFrame frame;
-
     fastdds::dds::DomainParticipant* participant;
     fastdds::dds::Publisher* publisher;
     fastdds::dds::Topic* topic;
@@ -55,6 +53,7 @@ private:
     PubListener listener;
 
     std::atomic<bool> stop;
+    uint8_t sentCount;
 
     void runThread(uint32_t sleep_us);
     bool publish();

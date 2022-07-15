@@ -27,6 +27,7 @@ find_package(fastrtps REQUIRED)
 
 add_subdirectory(video_publisher_dynamic)
 add_subdirectory(video_publisher_static)
+add_subdirectory(video_subscriber_static)
 add_subdirectory(generic_subscriber)
 add_subdirectory(msgs)
 

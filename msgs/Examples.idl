@@ -6,8 +6,7 @@ struct VideoFrame
 
 struct VideoFrameFixed
 {
-    // string format;
-    octet fmt[64];
+    octet format[32];
     unsigned long width;
     unsigned long height;
     // 1920 * 1080 * 3

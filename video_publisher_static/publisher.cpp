@@ -29,9 +29,8 @@ VideoFramePublisher::VideoFramePublisher(
         publisher(publisher_),
         topic(topic_),
         writer(writer_),
-        listener(listener_) {
-    frame.format("RGB888");
-}
+        listener(listener_),
+        sentCount(0) {}
 
 VideoFramePublisher::~VideoFramePublisher() {
     publisher->delete_datawriter(writer);
@@ -41,7 +40,7 @@ VideoFramePublisher::~VideoFramePublisher() {
     factory->delete_participant(participant);
 }
 
-VideoFramePublisher VideoFramePublisher::createPublisher() {
+VideoFramePublisher VideoFramePublisher::createPublisher(uint32_t buffer_len) {
     fastdds::dds::DomainParticipantQos pqos = fastdds::dds::PARTICIPANT_QOS_DEFAULT;
     pqos.name("Participant_pub");
     auto factory = fastdds::dds::DomainParticipantFactory::get_instance();
@@ -89,6 +88,9 @@ VideoFramePublisher VideoFramePublisher::createPublisher() {
 
     // CREATE THE WRITER
     fastdds::dds::DataWriterQos wqos = fastdds::dds::DATAWRITER_QOS_DEFAULT;
+    wqos.history().depth = buffer_len;
+    wqos.durability().kind = fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
+    wqos.data_sharing().on("shared_directory");
 
     auto listener = PubListener();
 
@@ -154,9 +156,23 @@ void VideoFramePublisher::runForever(uint32_t sleep_us)
 bool VideoFramePublisher::publish() {
     if (listener.matched > -1)
     {
-        frame.data({'1', '2', '3', '4'});
-        writer->write(&frame);
-        std::cout << "Message written" << std::endl;
+        void* sample = nullptr;
+        if (ReturnCode_t::RETCODE_OK == writer->loan_sample(sample))
+        {
+            VideoFrameFixed* frame = static_cast<VideoFrameFixed*>(sample);
+            auto& format = frame->format();
+            auto& width = frame->width();
+            auto& height = frame->height();
+            auto& data = frame->data();
+            format = {'R', 'G', 'B', '8', '8', '8', 0x0};
+            width = 1920;
+            height = 1080;
+            data[0] = sentCount++;
+            data[1] = sentCount + 1;
+            data[2] = sentCount + 2;
+        }
+        writer->write(sample);
+        std::cout << "Message " << sentCount - 1 << " written" << std::endl;
         return true;
     }
     return false;

@@ -255,8 +255,8 @@ void VideoFrame::serializeKey(
 
 VideoFrameFixed::VideoFrameFixed()
 {
-    // m_fmt com.eprosima.idl.parser.typecode.ArrayTypeCode@4ae82894
-    memset(&m_fmt, 0, (6220800) * 1);
+    // m_format com.eprosima.idl.parser.typecode.ArrayTypeCode@4ae82894
+    memset(&m_format, 0, (32) * 1);
     // m_width com.eprosima.idl.parser.typecode.PrimitiveTypeCode@543788f3
     m_width = 0;
     // m_height com.eprosima.idl.parser.typecode.PrimitiveTypeCode@6d3af739
@@ -277,7 +277,7 @@ VideoFrameFixed::~VideoFrameFixed()
 VideoFrameFixed::VideoFrameFixed(
         const VideoFrameFixed& x)
 {
-    m_fmt = x.m_fmt;
+    m_format = x.m_format;
     m_width = x.m_width;
     m_height = x.m_height;
     m_data = x.m_data;
@@ -286,7 +286,7 @@ VideoFrameFixed::VideoFrameFixed(
 VideoFrameFixed::VideoFrameFixed(
         VideoFrameFixed&& x)
 {
-    m_fmt = std::move(x.m_fmt);
+    m_format = std::move(x.m_format);
     m_width = x.m_width;
     m_height = x.m_height;
     m_data = std::move(x.m_data);
@@ -296,7 +296,7 @@ VideoFrameFixed& VideoFrameFixed::operator =(
         const VideoFrameFixed& x)
 {
 
-    m_fmt = x.m_fmt;
+    m_format = x.m_format;
     m_width = x.m_width;
     m_height = x.m_height;
     m_data = x.m_data;
@@ -308,7 +308,7 @@ VideoFrameFixed& VideoFrameFixed::operator =(
         VideoFrameFixed&& x)
 {
 
-    m_fmt = std::move(x.m_fmt);
+    m_format = std::move(x.m_format);
     m_width = x.m_width;
     m_height = x.m_height;
     m_data = std::move(x.m_data);
@@ -320,7 +320,7 @@ bool VideoFrameFixed::operator ==(
         const VideoFrameFixed& x) const
 {
 
-    return (m_fmt == x.m_fmt && m_width == x.m_width && m_height == x.m_height && m_data == x.m_data);
+    return (m_format == x.m_format && m_width == x.m_width && m_height == x.m_height && m_data == x.m_data);
 }
 
 bool VideoFrameFixed::operator !=(
@@ -335,7 +335,7 @@ size_t VideoFrameFixed::getMaxCdrSerializedSize(
     size_t initial_alignment = current_alignment;
 
 
-    current_alignment += ((6220800) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+    current_alignment += ((32) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
 
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -359,9 +359,9 @@ size_t VideoFrameFixed::getCdrSerializedSize(
     size_t initial_alignment = current_alignment;
 
 
-    if ((6220800) > 0)
+    if ((32) > 0)
     {
-        current_alignment += ((6220800) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
+        current_alignment += ((32) * 1) + eprosima::fastcdr::Cdr::alignment(current_alignment, 1);
     }
 
     current_alignment += 4 + eprosima::fastcdr::Cdr::alignment(current_alignment, 4);
@@ -383,7 +383,7 @@ void VideoFrameFixed::serialize(
         eprosima::fastcdr::Cdr& scdr) const
 {
 
-    scdr << m_fmt;
+    scdr << m_format;
 
     scdr << m_width;
     scdr << m_height;
@@ -396,7 +396,7 @@ void VideoFrameFixed::deserialize(
         eprosima::fastcdr::Cdr& dcdr)
 {
 
-    dcdr >> m_fmt;
+    dcdr >> m_format;
 
     dcdr >> m_width;
     dcdr >> m_height;
@@ -405,41 +405,41 @@ void VideoFrameFixed::deserialize(
 }
 
 /*!
- * @brief This function copies the value in member fmt
- * @param _fmt New value to be copied in member fmt
+ * @brief This function copies the value in member format
+ * @param _format New value to be copied in member format
  */
-void VideoFrameFixed::fmt(
-        const std::array<uint8_t, 6220800>& _fmt)
+void VideoFrameFixed::format(
+        const std::array<uint8_t, 32>& _format)
 {
-    m_fmt = _fmt;
+    m_format = _format;
 }
 
 /*!
- * @brief This function moves the value in member fmt
- * @param _fmt New value to be moved in member fmt
+ * @brief This function moves the value in member format
+ * @param _format New value to be moved in member format
  */
-void VideoFrameFixed::fmt(
-        std::array<uint8_t, 6220800>&& _fmt)
+void VideoFrameFixed::format(
+        std::array<uint8_t, 32>&& _format)
 {
-    m_fmt = std::move(_fmt);
+    m_format = std::move(_format);
 }
 
 /*!
- * @brief This function returns a constant reference to member fmt
- * @return Constant reference to member fmt
+ * @brief This function returns a constant reference to member format
+ * @return Constant reference to member format
  */
-const std::array<uint8_t, 6220800>& VideoFrameFixed::fmt() const
+const std::array<uint8_t, 32>& VideoFrameFixed::format() const
 {
-    return m_fmt;
+    return m_format;
 }
 
 /*!
- * @brief This function returns a reference to member fmt
- * @return Reference to member fmt
+ * @brief This function returns a reference to member format
+ * @return Reference to member format
  */
-std::array<uint8_t, 6220800>& VideoFrameFixed::fmt()
+std::array<uint8_t, 32>& VideoFrameFixed::format()
 {
-    return m_fmt;
+    return m_format;
 }
 /*!
  * @brief This function sets a value in member width

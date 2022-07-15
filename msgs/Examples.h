@@ -295,30 +295,30 @@ public:
             const VideoFrameFixed& x) const;
 
     /*!
-     * @brief This function copies the value in member fmt
-     * @param _fmt New value to be copied in member fmt
+     * @brief This function copies the value in member format
+     * @param _format New value to be copied in member format
      */
-    eProsima_user_DllExport void fmt(
-            const std::array<uint8_t, 6220800>& _fmt);
+    eProsima_user_DllExport void format(
+            const std::array<uint8_t, 32>& _format);
 
     /*!
-     * @brief This function moves the value in member fmt
-     * @param _fmt New value to be moved in member fmt
+     * @brief This function moves the value in member format
+     * @param _format New value to be moved in member format
      */
-    eProsima_user_DllExport void fmt(
-            std::array<uint8_t, 6220800>&& _fmt);
+    eProsima_user_DllExport void format(
+            std::array<uint8_t, 32>&& _format);
 
     /*!
-     * @brief This function returns a constant reference to member fmt
-     * @return Constant reference to member fmt
+     * @brief This function returns a constant reference to member format
+     * @return Constant reference to member format
      */
-    eProsima_user_DllExport const std::array<uint8_t, 6220800>& fmt() const;
+    eProsima_user_DllExport const std::array<uint8_t, 32>& format() const;
 
     /*!
-     * @brief This function returns a reference to member fmt
-     * @return Reference to member fmt
+     * @brief This function returns a reference to member format
+     * @return Reference to member format
      */
-    eProsima_user_DllExport std::array<uint8_t, 6220800>& fmt();
+    eProsima_user_DllExport std::array<uint8_t, 32>& format();
     /*!
      * @brief This function sets a value in member width
      * @param _width New value for member width
@@ -442,7 +442,7 @@ public:
 
 private:
 
-    std::array<uint8_t, 6220800> m_fmt;
+    std::array<uint8_t, 32> m_format;
     uint32_t m_width;
     uint32_t m_height;
     std::array<uint8_t, 6220800> m_data;
