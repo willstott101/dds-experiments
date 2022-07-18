@@ -1,4 +1,6 @@
 #include "./subscriber.h"
+#include <chrono>
+#include <thread>
 
 #include <fastrtps/attributes/ParticipantAttributes.h>
 #include <fastrtps/attributes/SubscriberAttributes.h>
@@ -59,8 +61,10 @@ bool VideoSubscriber::init()
     }
 
     // CREATE THE READER
-    DataReaderQos rqos = DATAREADER_QOS_DEFAULT;
+    DataReaderQos rqos = subscriber->get_default_datareader_qos();
+    rqos.history().depth = 32;
     rqos.reliability().kind = RELIABLE_RELIABILITY_QOS;
+    rqos.durability().kind = TRANSIENT_LOCAL_DURABILITY_QOS;
 
     reader = subscriber->create_datareader(topic, rqos, &listener);
 
@@ -113,15 +117,49 @@ void VideoSubscriber::SubListener::on_subscription_matched(
 void VideoSubscriber::SubListener::on_data_available(
         DataReader* reader)
 {
-    SampleInfo info;
-    if (reader->take_next_sample(&hello_, &info) == ReturnCode_t::RETCODE_OK)
+    FASTDDS_SEQUENCE(DataSeq, VideoFrameFixed);
+
+    std::cout << " == on_data_available == " << std::endl;
+
+    DataSeq data;
+    SampleInfoSeq infos;
+    uint16_t firstNum = 0;
+    uint16_t lastNum = 0;
+    if (ReturnCode_t::RETCODE_OK == reader->read(data, infos))
     {
-        if (info.instance_state == ALIVE_INSTANCE_STATE)
+        std::cout << " (copied " << data.has_ownership() << ")" << std::endl;
+
+        // Iterate over each LoanableCollection in the SampleInfo sequence
+        for (LoanableCollection::size_type i = 0; i < infos.length(); ++i)
         {
-            samples++;
-            // Print your structure data here.
-            std::cout << "Message " << hello_.message() << " " << hello_.index() << " RECEIVED" << std::endl;
+            // Check whether the DataSample contains data or is only used to communicate of a
+            // change in the instance
+            if (infos[i].valid_data)
+            {
+                const VideoFrameFixed& sample = data[i];
+
+                lastNum = sample.data()[0];
+
+                if (i == 0) {
+                    firstNum = lastNum;
+                    std::cout << "  first is " << firstNum << " from time " << infos[i].source_timestamp  << std::endl;
+                }
+            }
         }
+        std::cout << "  " << infos.length() << " sample received [" << firstNum << ", " << lastNum << "]" << std::endl;
+
+
+        if (infos[0].valid_data) {
+            for (uint16_t i = 0; i <= 3; i++) {
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+                std::cout << "  ... later first says " << (uint16_t)data[0].data()[0] << " at " << &(data[0]) << "" << " from time " << infos[0].source_timestamp  << std::endl;
+            }
+        }
+
+        // Indicate to the DataReader that the application is done accessing the collection of
+        // data values and SampleInfo, obtained by some earlier invocation of read or take on the
+        // DataReader.
+        reader->return_loan(data, infos);
     }
 }
 

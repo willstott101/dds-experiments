@@ -53,7 +53,7 @@ VideoFramePublisher VideoFramePublisher::createPublisher(uint32_t buffer_len) {
     }
 
     // REGISTER THE TYPE
-    fastdds::dds::TypeSupport type(new VideoFramePubSubType());
+    fastdds::dds::TypeSupport type(new VideoFrameFixedPubSubType());
     type.get()->auto_fill_type_information(false);
     type.get()->auto_fill_type_object(true);
     type.register_type(participant);
@@ -90,7 +90,7 @@ VideoFramePublisher VideoFramePublisher::createPublisher(uint32_t buffer_len) {
     fastdds::dds::DataWriterQos wqos = fastdds::dds::DATAWRITER_QOS_DEFAULT;
     wqos.history().depth = buffer_len;
     wqos.durability().kind = fastdds::dds::TRANSIENT_LOCAL_DURABILITY_QOS;
-    wqos.data_sharing().on("shared_directory");
+    // wqos.data_sharing().on("shared_directory");
 
     auto listener = PubListener();
 
@@ -137,7 +137,7 @@ void VideoFramePublisher::runThread(uint32_t sleep_us)
     {
         if (publish())
         {
-            std::cout << "Message sent" << std::endl;
+            // std::cout << "Message sent" << std::endl;
         }
         std::this_thread::sleep_for(std::chrono::microseconds(sleep_us));
     }
@@ -159,6 +159,8 @@ bool VideoFramePublisher::publish() {
         void* sample = nullptr;
         if (ReturnCode_t::RETCODE_OK == writer->loan_sample(sample))
         {
+            // auto instance_handle = writer->register_instance(sample);
+
             VideoFrameFixed* frame = static_cast<VideoFrameFixed*>(sample);
             auto& format = frame->format();
             auto& width = frame->width();
@@ -170,9 +172,35 @@ bool VideoFramePublisher::publish() {
             data[0] = sentCount++;
             data[1] = sentCount + 1;
             data[2] = sentCount + 2;
+
+            fastrtps::rtps::Time_t t;
+            fastrtps::rtps::Time_t::now(t);
+            // writer->write_w_timestamp(sample, instance_handle, t);
+            // writer->write(sample);
+
+            fastrtps::rtps::WriteParams wp = fastrtps::rtps::WriteParams::WRITE_PARAM_DEFAULT;
+            fastrtps::rtps::Time_t::now(wp.source_timestamp());
+            auto r = writer->write(sample, wp);
+            if (r) {
+                std::cout << "Message " << sentCount - 1 << " written" << std::endl;
+            } else {
+                std::cout << "Message " << sentCount - 1 << " failed" << std::endl;
+                writer->discard_loan(sample);
+            }
+
+            // auto r = writer->write(sample, instance_handle);
+            // if (ReturnCode_t::RETCODE_OK == r) {
+            //     std::cout << "Message " << sentCount - 1 << " written" << std::endl;
+            // } else {
+            //     std::cout << "Message " << sentCount - 1 << " failed: " << r() << std::endl;
+            //     writer->discard_loan(sample);
+            // }
+
+            // writer->unregister_instance(sample, instance_handle);
         }
-        writer->write(sample);
-        std::cout << "Message " << sentCount - 1 << " written" << std::endl;
+
+
+        // writer->write(sample, writer->get_instance_handle());
         return true;
     }
     return false;
